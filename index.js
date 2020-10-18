@@ -3,7 +3,7 @@ var express = require('express');
 var app = express();
 var jwt = require('jsonwebtoken');
 const sequelize = require('sequelize');
-const db = require('./dbinit');
+const db = require('./models');
 const bcrypt = require('bcrypt');
 app.use(express.json());
 const secret = require('./config.js');
@@ -11,9 +11,8 @@ const { Op } = require('sequelize');
 const { EDESTADDRREQ } = require('constants');
 const { fileURLToPath } = require('url');
 
-// respond with "hello world" when a GET request is made to the homepage
 app.get('/', function(req, res) {
-  res.send('home page');
+  res.send('Página inicial');
 });
 
 app.post('/login', (req, res) => { // auth
@@ -39,26 +38,28 @@ app.post('/login', (req, res) => { // auth
     }).catch(function(){res.send("Usuario inexistente.")});
 })
 
-app.post('/admin/edit', function(req,res){ //editar usuarios
+app.post('/admin/editar', function(req,res){ //editar info
     var token = req.headers['authorization'];
     if (!token) res.status(401).json({ auth: false, message: 'No token provided.' });
     token=token.substring(7); //remove tag 'Bearer '
     jwt.verify(token, secret, function(err, decoded) {
         if (err || decoded['name']!="admin") res.status(500).json({ auth: false, message: 'Unauthorized.' });      
         else{
-            bcrypt.hash(req.body['senha'],1, (err, hash) => { //criptografa senha
-                console.log(hash);
-                db.usuario.update({ //atualiza registro
-                    hash:hash
-                },
-                {
-                    where:{"nome":req.body['nome']}
-                }).then(function (){
+            db.filme.findOne({
+                where:{nome:req.body['nome']}
+            }).then( function(filme){
+                var query={};
+                if(req.body['genero']){query['genero']=req.body['genero']}
+                if(req.body['diretor']){query['diretor']=req.body['diretor']}
+                if(req.body['atores']){query['atores']=req.body['atores']}
+                filme.update(query).then(function(){
                     res.send('Alterado com sucesso.');
-                }).catch(function (err){
-                    res.send("Erro ."+err)
+                }).catch(function(err){
+                    res.send(err);
                 });
-            })
+            }).catch(function(err){
+                res.send('Não encontrado.'+err)
+            });
         }
     });   
 });
@@ -68,12 +69,12 @@ app.post('/admin/remove', function(req,res){ //excluir usuarios
     if (!token) res.status(401).json({ auth: false, message: 'No token provided.' });
     token=token.substring(7); //remove tag 'Bearer '
     jwt.verify(token, secret, function(err, decoded) {
-        if (err || decoded['name']!="admin" || req.body['nome']=="admin") res.status(500).json({ auth: false, message: 'Unauthorized.' });      
+        if (err || decoded['name']!="admin") res.status(500).json({ auth: false, message: 'Unauthorized.' });      
         else{
-            db.usuario.destroy({
+            db.filme.destroy({
                 where:{"nome":req.body['nome']}
             }).then(function (){
-                res.send('Usuario removido.');
+                res.send('Filme removido.');
             }).catch(function (err){
                 res.send("Erro ."+err)
             });
