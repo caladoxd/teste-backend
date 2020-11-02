@@ -83,15 +83,10 @@ app.post('/admin/remove', function(req,res){ //excluir usuarios
 });
 
 app.post('/cadastro', function(req, res) { //adiciona usuário
-    bcrypt.hash(req.body['senha'],1, (err, hash) => { //criptografa senha
-        db.usuario.create({
-            nome:req.body['nome'],
-            hash:hash
-        }).then(function (){
-            res.send('Adicionado com sucesso.');
-        }).catch(function (err){
-            res.send("Erro ."+err)
-        });
+    userController.register(req.body['nome'],req.body['senha'])
+    .then(retorno => res.status(200).send(retorno))
+    .catch(err => res.status(200).send(err));
+});
     })
 });
 
