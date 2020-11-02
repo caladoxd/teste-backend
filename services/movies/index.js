@@ -77,8 +77,7 @@ module.exports = {
                                 rating.update({nota:body.nota});
                                 resolve({message:"Nota registrada."})
                             }
-                        })
-                        
+                        })                       
                     }
                 }).catch(err => reject(err));
             }).catch(err => reject(err));
