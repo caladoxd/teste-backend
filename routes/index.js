@@ -1,13 +1,8 @@
-var app = require('./routes')
-
-app.listen(3000, function(){
-    console.log('ready');
-});
-/*var express = require('express');
+var express = require('express');
 var app = express();
 app.use(express.json());
-var {userController} = require('./controllers/')
-var {adminController} = require('./controllers')
+var {userController} = require('../controllers/')
+var {adminController} = require('../controllers')
 
 
 app.post('/login', (req, res) => { // auth
@@ -70,9 +65,4 @@ app.get('/filmes/detalhes', function(req, res) { //detalhes
         .catch(err => res.status(200).json({message: err}));
 });
 
-
-
-app.listen(3000, function(){
-    console.log('ready');
-});
-*/
+module.exports=app;
